@@ -1,29 +1,97 @@
 package net.javaguides.springboot.services;
 
-import net.javaguides.springboot.model.dto.UserRegistrationDto;
-import net.javaguides.springboot.model.entity.Role;
-import net.javaguides.springboot.model.entity.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.javaguides.springboot.models.dto.UserDto;
+import net.javaguides.springboot.models.entity.ERole;
+import net.javaguides.springboot.models.entity.Role;
+import net.javaguides.springboot.models.entity.User;
+import net.javaguides.springboot.repository.RoleRepository;
 import net.javaguides.springboot.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Service
-public class UserServiceImpl implements UserService {
+@RequiredArgsConstructor
+@Transactional
+@Slf4j
+public class UserServiceImpl implements UserService, UserDetailsService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl (UserRepository userRepository){
-        super();
-        this.userRepository = userRepository;
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+        if (user == null){
+            log.error("User not found in the database");
+            throw new UsernameNotFoundException("User not found in the database");
+        } else {
+            log.info("User found in the database: {}", username);
+        }
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        user.getRoles().forEach(role -> {
+            authorities.add(new SimpleGrantedAuthority(role.getName().toString()));
+        });
+        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 
     @Override
-    public User save(UserRegistrationDto registrationDto) {
-        User user = new User(registrationDto.getFirstName(),
-                registrationDto.getLastName(), registrationDto.getEmail(),
-                registrationDto.getPassword(), Arrays.asList(new Role("ROLE_USER")));
-
+    public User saveUser(User user) {
+        log.info("Saving new user {} to the database", user.getUsername());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
+
+    @Override
+    public Role saveRole(Role role) {
+        log.info("Saving new role {} to the database", role.getName());
+        return roleRepository.save(role);
+    }
+
+    @Override
+    public void addRoleToUser(String username, String roleName) {
+        log.info("Adding role {} to user {}", roleName, username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+        Role role = roleRepository.findByName(ERole.valueOf(roleName))
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        user.getRoles().add(role);
+    }
+
+    @Override
+    public User getUser(String username) {
+        log.info("Fetching user by username = {}", username);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+    }
+
+    @Override
+    public List<User> getUsers() {
+        log.info("Fetching all users");
+        List<User> users = userRepository.findAll();
+        log.info("Fetched {} users", users.size());
+        return users;
+    }
+
+    private UserDto toDto(User user){
+        UserDto userDto = new UserDto();
+        userDto.setUsername(user.getUsername());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        return userDto;
+    }
+
+
 }

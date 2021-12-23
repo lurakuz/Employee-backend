@@ -1,9 +1,14 @@
 package net.javaguides.springboot.services;
 
-import net.javaguides.springboot.model.dto.UserRegistrationDto;
-import net.javaguides.springboot.model.entity.User;
+import net.javaguides.springboot.models.entity.Role;
+import net.javaguides.springboot.models.entity.User;
+
+import java.util.List;
 
 public interface UserService {
-    User save(UserRegistrationDto registrationDto);
-
+    User saveUser(User user);
+    Role saveRole(Role role);
+    void addRoleToUser(String email, String roleEmail);
+    User getUser(String email);
+    List<User>getUsers();
 }

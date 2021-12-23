@@ -2,7 +2,7 @@ package net.javaguides.springboot.services;
 
 import java.util.List;
 
-import net.javaguides.springboot.model.entity.Employee;
+import net.javaguides.springboot.models.entity.Employee;
 
 public interface EmployeeService {
 

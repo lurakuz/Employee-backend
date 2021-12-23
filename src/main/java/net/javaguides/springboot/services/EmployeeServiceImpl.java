@@ -3,11 +3,11 @@ package net.javaguides.springboot.services;
 import java.util.List;
 
 import net.javaguides.springboot.exception.ResourceNotFoundException;
-import net.javaguides.springboot.model.dto.EmployeeDto;
+import net.javaguides.springboot.models.dto.EmployeeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import net.javaguides.springboot.model.entity.Employee;
+import net.javaguides.springboot.models.entity.Employee;
 import net.javaguides.springboot.repository.EmployeeRepository;
 
 @Service
