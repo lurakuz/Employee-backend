@@ -21,9 +21,28 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<Employee> getAllEmployees() {
-        return empRep.findAll();
+    public List<Employee> getAllEmployees(Integer pageNo, Integer pageSize, String sortBy) {
+        return null;
     }
+
+    @Override
+    public List<Employee> getAllEmployees(){
+        return (List<Employee>) empRep.findAll();
+    }
+
+//    @Override
+//    public List<Employee> getAllEmployees(Integer pageNo, Integer pageSize, String sortBy)
+//    {
+//        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+//
+//        Page<Employee> pagedResult = empRep.findAll(paging);
+//
+//        if(pagedResult.hasContent()) {
+//            return pagedResult.getContent();
+//        } else {
+//            return new ArrayList<Employee>();
+//        }
+//    }
 
     @Override
     public Employee findEmployeeById(Long id) {

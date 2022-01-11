@@ -1,5 +1,6 @@
 package net.javaguides.springboot.services;
 
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javaguides.springboot.models.dto.UserDto;
@@ -8,6 +9,7 @@ import net.javaguides.springboot.models.entity.Role;
 import net.javaguides.springboot.models.entity.User;
 import net.javaguides.springboot.repository.RoleRepository;
 import net.javaguides.springboot.repository.UserRepository;
+import net.javaguides.springboot.security.services.UserDetailsImpl;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -85,11 +88,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return users;
     }
 
+    @Override
+    public UserDto getLoggedUser(UserDetailsImpl userDetails) {
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User Not Found with username: " + username));
+        return toDto(user);
+    }
+
     private UserDto toDto(User user){
         UserDto userDto = new UserDto();
         userDto.setUsername(user.getUsername());
         userDto.setFirstName(user.getFirstName());
         userDto.setLastName(user.getLastName());
+        userDto.setEmail(user.getEmail());
         return userDto;
     }
 

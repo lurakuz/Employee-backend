@@ -3,10 +3,14 @@ package net.javaguides.springboot.controllers;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javaguides.springboot.models.dto.UserDto;
 import net.javaguides.springboot.models.entity.Role;
 import net.javaguides.springboot.models.entity.User;
+import net.javaguides.springboot.security.services.UserDetailsImpl;
 import net.javaguides.springboot.services.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,6 +27,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<User>> getUsers(){
         log.info("Handled getting all users request");
         log.info("userService = {}", userService);
@@ -51,7 +56,11 @@ public class UserController {
         log.info("userService = {}", userService);
         userService.addRoleToUser(form.getUsername(), form.getRoleName());
         return ResponseEntity.ok().build();
+    }
 
+    @GetMapping("/users/logged")
+    public ResponseEntity<UserDto> getLoggedUser(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return ResponseEntity.ok().body(userService.getLoggedUser(userDetails));
     }
 }
 

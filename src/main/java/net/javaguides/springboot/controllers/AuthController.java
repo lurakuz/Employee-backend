@@ -11,7 +11,7 @@ import net.javaguides.springboot.payload.responce.MessageResponse;
 import net.javaguides.springboot.repository.RoleRepository;
 import net.javaguides.springboot.repository.UserRepository;
 import net.javaguides.springboot.security.jwt.JwtUtils;
-import net.javaguides.springboot.security.services.UserDetailsImpl;
+import net.javaguides.springboot.services.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 @Slf4j
 public class AuthController {
     @Autowired
@@ -48,6 +48,9 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    UserServiceImpl userService;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {

@@ -1,30 +1,27 @@
 package net.javaguides.springboot.controllers;
 
+import net.javaguides.springboot.models.dto.EmployeeDto;
+import net.javaguides.springboot.models.entity.Employee;
+import net.javaguides.springboot.repository.EmployeeRepository;
+import net.javaguides.springboot.services.EmployeeServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.javaguides.springboot.models.dto.EmployeeDto;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import net.javaguides.springboot.models.entity.Employee;
-import net.javaguides.springboot.services.EmployeeServiceImpl;
-
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/v1/")
 public class EmployeeController {
+
+    @Autowired
+    private EmployeeRepository employeeData;
 
     private final EmployeeServiceImpl employeeServiceImpl;
 
@@ -47,6 +44,17 @@ public class EmployeeController {
         }
         return employeesDto;
     }
+
+//    @GetMapping("/employees")
+//    public ResponseEntity<List<Employee>> getAllEmployees(
+//            @RequestParam(defaultValue = "0") Integer pageNo,
+//            @RequestParam(defaultValue = "7") Integer pageSize,
+//            @RequestParam(defaultValue = "id") String sortBy)
+//    {
+//        List<Employee> list = employeeServiceImpl.getAllEmployees(pageNo, pageSize, sortBy);
+//
+//        return new ResponseEntity<>(list, new HttpHeaders(), HttpStatus.OK);
+//    }
 
     @PostMapping("/employees")
     public EmployeeDto createEmployee(@RequestBody Employee employee) {

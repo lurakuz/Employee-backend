@@ -39,10 +39,8 @@ public class SpringbootBackendApplication {
 //            userService.saveUser(new User("Jim", "Carry", "jim", "carry@gmail.com", "1234"));
 //            userService.saveUser(new User("Arnold", "Schwarzenegger", "arnold", "schwarznegger@gmail.com", "1234"));
 //
-//            userService.addRoleToUser("kuz9", "ROLE_USER");
-//            userService.addRoleToUser("kuz9", "ROLE_MANAGER");
 //            userService.addRoleToUser("kuz9", "ROLE_ADMIN");
-//            userService.addRoleToUser("john", "ROLE_USER");
+//            userService.addRoleToUser("john", "ROLE_MANAGER");
 //            userService.addRoleToUser("will", "ROLE_USER");
 //            userService.addRoleToUser("jim", "ROLE_USER");
 //            userService.addRoleToUser("arnold", "ROLE_USER");
