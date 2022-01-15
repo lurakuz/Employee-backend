@@ -1,12 +1,10 @@
 package net.javaguides.springboot.controllers;
 
+import net.javaguides.springboot.mappers.EmployeeMapper;
 import net.javaguides.springboot.models.dto.EmployeeDto;
 import net.javaguides.springboot.models.entity.Employee;
-import net.javaguides.springboot.repository.EmployeeRepository;
 import net.javaguides.springboot.services.EmployeeServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,29 +18,19 @@ import java.util.Map;
 @RequestMapping("/api/v1/")
 public class EmployeeController {
 
-    @Autowired
-    private EmployeeRepository employeeData;
+    private final EmployeeMapper employeeMapper;
 
     private final EmployeeServiceImpl employeeServiceImpl;
 
     @Autowired
-    public EmployeeController(EmployeeServiceImpl employeeServiceImpl) {
+    public EmployeeController(EmployeeMapper employeeMapper, EmployeeServiceImpl employeeServiceImpl) {
+        this.employeeMapper = employeeMapper;
         this.employeeServiceImpl = employeeServiceImpl;
     }
 
     @GetMapping("/employees") //http://localhost:8080/api/v1/employees
     public List<EmployeeDto> getAllEmployees(){
-        List<Employee> employees = employeeServiceImpl.getAllEmployees();
-        List<EmployeeDto> employeesDto = new ArrayList<>();
-        for (Employee employee : employees){
-            EmployeeDto employeeDto = new EmployeeDto();
-            employeeDto.setId(employee.getId());
-            employeeDto.setEmailId(employee.getEmailId());
-            employeeDto.setFirstName(employee.getFirstName());
-            employeeDto.setLastName(employee.getLastName());
-            employeesDto.add(employeeDto);
-        }
-        return employeesDto;
+        return employeeMapper.map(employeeServiceImpl.getAllEmployees());
     }
 
 //    @GetMapping("/employees")
@@ -59,13 +47,13 @@ public class EmployeeController {
     @PostMapping("/employees")
     public EmployeeDto createEmployee(@RequestBody Employee employee) {
         employeeServiceImpl.saveEmployee(employee);
-        return employeeServiceImpl.employeeToEmployeeDto(employee);
+        return employeeMapper.map(employee);
     }
 
     @GetMapping("/employees/{id}")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long id) {
         Employee employee = employeeServiceImpl.findEmployeeById(id);
-        return ResponseEntity.ok(employeeServiceImpl.employeeToEmployeeDto(employee));
+        return ResponseEntity.ok(employeeMapper.map(employee));
     }
 
     @PutMapping("/employees/{id}")
@@ -78,7 +66,7 @@ public class EmployeeController {
         employee.setEmailId(employeeDetails.getEmailId());
 
         Employee updatedEmployee = employeeServiceImpl.saveEmployee(employee);
-        return ResponseEntity.ok(employeeServiceImpl.employeeToEmployeeDto(updatedEmployee));
+        return ResponseEntity.ok(employeeMapper.map(updatedEmployee));
     }
 
     @DeleteMapping("/employees/{id}")

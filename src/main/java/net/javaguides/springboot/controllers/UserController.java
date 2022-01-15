@@ -3,6 +3,7 @@ package net.javaguides.springboot.controllers;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javaguides.springboot.mappers.UserMapper;
 import net.javaguides.springboot.models.dto.UserDto;
 import net.javaguides.springboot.models.entity.Role;
 import net.javaguides.springboot.models.entity.User;
@@ -24,14 +25,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final UserMapper userMapper;
     private final UserService userService;
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<User>> getUsers(){
+    public ResponseEntity<List<UserDto>> getUsers(){
         log.info("Handled getting all users request");
         log.info("userService = {}", userService);
-        return ResponseEntity.ok().body(userService.getUsers());
+        return ResponseEntity.ok().body(userMapper.map(userService.getUsers()));
     }
 
     @PostMapping("/user/save")

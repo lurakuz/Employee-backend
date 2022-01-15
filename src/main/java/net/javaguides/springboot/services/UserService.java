@@ -11,8 +11,9 @@ public interface UserService {
     User saveUser(User user);
     Role saveRole(Role role);
     void addRoleToUser(String email, String roleEmail);
-    User getUser(String email);
-    List<User>getUsers();
 
+    User getUser(String username);
+
+    List<User>getUsers();
     UserDto getLoggedUser(UserDetailsImpl userDetails);
 }
