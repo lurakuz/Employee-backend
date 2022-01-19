@@ -1,5 +1,8 @@
 package net.javaguides.springboot.controllers;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.javaguides.springboot.models.entity.ERole;
 import net.javaguides.springboot.models.entity.Role;
@@ -10,9 +13,8 @@ import net.javaguides.springboot.payload.responce.JwtResponse;
 import net.javaguides.springboot.payload.responce.MessageResponse;
 import net.javaguides.springboot.repository.RoleRepository;
 import net.javaguides.springboot.repository.UserRepository;
-import net.javaguides.springboot.security.jwt.JwtUtils;
+import net.javaguides.springboot.security.jwt.JwtTokenProvider;
 import net.javaguides.springboot.services.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,28 +32,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
-@RestController
-@RequestMapping("/api/auth")
+
 @Slf4j
+@Validated
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/auth")
+@CrossOrigin("http://localhost:4200")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthController {
-    @Autowired
-    AuthenticationManager authenticationManager;
 
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    RoleRepository roleRepository;
-
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    JwtUtils jwtUtils;
-
-    @Autowired
-    UserServiceImpl userService;
+    final AuthenticationManager authenticationManager;
+    final UserRepository userRepository;
+    final RoleRepository roleRepository;
+    final PasswordEncoder encoder;
+    final JwtTokenProvider jwtTokenProvider;
+    final UserServiceImpl userService;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -59,16 +56,16 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
+        String jwt = jwtTokenProvider.generateToken(authentication);
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
+        Role role = userService.getHighestUserRole(roles);
+        String bearerToken = "Bearer " + jwt;
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getUsername(),
-                roles));
+        return ResponseEntity.ok(new JwtResponse(bearerToken, role.toString()));
     }
 
     @PostMapping("/signup")
@@ -91,7 +88,7 @@ public class AuthController {
                 signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword())
-                );
+        );
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();

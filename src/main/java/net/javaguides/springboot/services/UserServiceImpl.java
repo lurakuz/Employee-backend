@@ -1,6 +1,8 @@
 package net.javaguides.springboot.services;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.javaguides.springboot.models.dto.UserDto;
 import net.javaguides.springboot.models.entity.ERole;
@@ -25,17 +27,18 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserServiceImpl implements UserService, UserDetailsService {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+    final UserRepository userRepository;
+    final RoleRepository roleRepository;
+    final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
-        if (user == null){
+        if (user == null) {
             log.error("User not found in the database");
             throw new UsernameNotFoundException("User not found in the database");
         } else {
@@ -71,6 +74,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.getRoles().add(role);
     }
 
+    public Role getHighestUserRole(List<String> roles) {
+        int rank = roles.stream()
+                .map(ERole::valueOf)
+                .mapToInt(ERole::getValue)
+                .max().orElse(0);
+        ERole highestERole = ERole.ROLE_USER;
+        ERole[] values = ERole.values();
+        for (ERole eRole : values)
+            if (eRole.getValue() == rank) highestERole = eRole;
+
+        return roleRepository.findByName(highestERole)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+    }
+
     @Override
     public User getUser(String username) {
         log.info("Fetching user by username = {}", username);
@@ -94,7 +111,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return toDto(user);
     }
 
-    private UserDto toDto(User user){
+    private UserDto toDto(User user) {
         UserDto userDto = new UserDto();
         userDto.setUsername(user.getUsername());
         userDto.setFirstName(user.getFirstName());

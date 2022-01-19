@@ -1,5 +1,7 @@
 package net.javaguides.springboot.controllers;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import net.javaguides.springboot.mappers.EmployeeMapper;
 import net.javaguides.springboot.models.dto.EmployeeDto;
 import net.javaguides.springboot.models.entity.Employee;
@@ -15,12 +17,13 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
-@RequestMapping("/api/v1/")
+@RequestMapping("/employees")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeController {
 
-    private final EmployeeMapper employeeMapper;
+    final EmployeeMapper employeeMapper;
 
-    private final EmployeeServiceImpl employeeServiceImpl;
+    final EmployeeServiceImpl employeeServiceImpl;
 
     @Autowired
     public EmployeeController(EmployeeMapper employeeMapper, EmployeeServiceImpl employeeServiceImpl) {
@@ -28,7 +31,7 @@ public class EmployeeController {
         this.employeeServiceImpl = employeeServiceImpl;
     }
 
-    @GetMapping("/employees") //http://localhost:8080/api/v1/employees
+    @GetMapping //http://localhost:8080/api/v1/employees
     public List<EmployeeDto> getAllEmployees(){
         return employeeMapper.map(employeeServiceImpl.getAllEmployees());
     }
@@ -50,13 +53,13 @@ public class EmployeeController {
         return employeeMapper.map(employee);
     }
 
-    @GetMapping("/employees/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long id) {
         Employee employee = employeeServiceImpl.findEmployeeById(id);
         return ResponseEntity.ok(employeeMapper.map(employee));
     }
 
-    @PutMapping("/employees/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable Long id,@RequestBody Employee employeeDetails){
 
         Employee employee = employeeServiceImpl.findEmployeeById(id);
@@ -69,7 +72,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeMapper.map(updatedEmployee));
     }
 
-    @DeleteMapping("/employees/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> deleteEmployee(@PathVariable Long id){
         Employee employee = employeeServiceImpl.findEmployeeById(id);
 

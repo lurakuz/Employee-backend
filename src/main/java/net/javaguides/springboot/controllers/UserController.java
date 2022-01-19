@@ -1,7 +1,9 @@
 package net.javaguides.springboot.controllers;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.javaguides.springboot.mappers.UserMapper;
 import net.javaguides.springboot.models.dto.UserDto;
@@ -21,14 +23,15 @@ import java.util.List;
 @Slf4j
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
-@RequestMapping(path = "api/v1/")
+@RequestMapping(path = "/users")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController {
 
-    private final UserMapper userMapper;
-    private final UserService userService;
+    final UserMapper userMapper;
+    final UserService userService;
 
-    @GetMapping("/users")
+    @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<UserDto>> getUsers(){
         log.info("Handled getting all users request");
@@ -36,7 +39,7 @@ public class UserController {
         return ResponseEntity.ok().body(userMapper.map(userService.getUsers()));
     }
 
-    @PostMapping("/user/save")
+    @PostMapping("/save")
     public ResponseEntity<User> saveUser(@RequestBody User user){
         log.info("Handled saving user request");
         log.info("userService = {}", userService);
@@ -60,7 +63,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/users/logged")
+    @GetMapping("/logged")
     public ResponseEntity<UserDto> getLoggedUser(@AuthenticationPrincipal UserDetailsImpl userDetails){
         return ResponseEntity.ok().body(userService.getLoggedUser(userDetails));
     }

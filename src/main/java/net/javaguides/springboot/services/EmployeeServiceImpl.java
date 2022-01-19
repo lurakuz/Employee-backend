@@ -2,6 +2,9 @@ package net.javaguides.springboot.services;
 
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import net.javaguides.springboot.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,14 +13,11 @@ import net.javaguides.springboot.models.entity.Employee;
 import net.javaguides.springboot.repository.EmployeeRepository;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeServiceImpl implements EmployeeService {
 
-    EmployeeRepository empRep;
-
-    @Autowired
-    public EmployeeServiceImpl(EmployeeRepository empRep) {
-        this.empRep = empRep;
-    }
+    final EmployeeRepository empRep;
 
     @Override
     public List<Employee> getAllEmployees(){
